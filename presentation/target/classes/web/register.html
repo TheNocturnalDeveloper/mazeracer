@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          crossorigin="anonymous"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" />
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+
+<nav class="navbar navbar-light navbar-expand-md bg-white">
+    <a class="navbar-brand" href="/" >DungeonSurvivor</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsingNavbar3">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-collapse collapse" id="collapsingNavbar3">
+        <ul class="navbar-nav justify-content-center">
+            <li class="nav-item">
+                <a class="nav-link text-dark" href="/" >home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark" href="/leaderboard" >leaderboard</a>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
+            <li class="nav-item">
+                <!--                @if (Context.User.Identity.IsAuthenticated)-->
+                <!--                {-->
+            <li class="nav-item"><a class="nav-link text-dark" href="/logout" >logout</a> </li>
+
+            <!--            }-->
+            <!--            else-->
+            <!--            {-->
+            <li class="nav-item">
+                <a class="nav-link text-dark" href="/login" >login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark" href="/register" >register</a>
+            </li>
+            <!--            }-->
+        </ul>
+    </div>
+</nav>
+<section class="container-fluid flex-grow-1 ">
+    <div class="min-h-0">
+        <h1>register</h1>
+        <hr />
+        <div class="row">
+            <div class="col-md-4">
+                <form action="" method="post">
+                    <input type="text" name="username" maxlength="100" />
+                    <input type="password" name="password" maxlength="100" />
+                    <input type="submit" />
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="bg-dark text-white mt-4">
+    <div class="container-fluid py-3">
+        <div class="row">
+            <div class="col-md-3">
+                <h5>Footer</h5>
+            </div>
+            <div class="col-md-3"></div>
+            <div class="col-md-3"></div>
+            <div class="col-md-3"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">I stay at the bottom of the viewport! <span class="small"><br>Unless the page content pushes me further.</span></div>
+            <div class="col-md-3"></div>
+            <div class="col-md-3 text-right small align-self-end">&copy; 2019 - DungeonSurvivor -</div>
+        </div>
+    </div>
+</footer>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+        crossorigin="anonymous"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=">
+</script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"
+        integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o">
+</script>
+
+</body>
+</html>
