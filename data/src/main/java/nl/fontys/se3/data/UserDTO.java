@@ -3,7 +3,7 @@ package nl.fontys.se3.data;
 public class UserDTO {
     private final String username;
     private final String password;
-    private final int score;
+    private int score;
 
 
     public UserDTO(String username, String password, int score) {
@@ -29,5 +29,9 @@ public class UserDTO {
 
     public int getScore() {
         return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 }

@@ -6,7 +6,7 @@ public interface IMazeRacerClient {
 
     void moveEnemy(String username, Coord coord);
 
-    void NotifyPlayerWon(String username);
+    void notifyPlayerWon(String username);
 
     void removeBonus(Coord coord);
 

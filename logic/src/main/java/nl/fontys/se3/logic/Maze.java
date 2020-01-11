@@ -72,14 +72,16 @@ public class Maze {
             neighbours.clear();
         }
 
+        markEndPoints();
+
     }
 
-    private int getIndex(int x, int y) {
+    public int getIndex(int x, int y) {
         return   x + y * width;
     }
 
 
-    private static void removeWalls(Cell a, Cell b) {
+    public static void removeWalls(Cell a, Cell b) {
         if(a.getX() == b.getX()) {
             //the x-axis of the current cell and the neighbour are the same,
             // so that means they have a different y-axis
@@ -107,7 +109,7 @@ public class Maze {
         }
     }
 
-    private void checkLeftNeighbour(Cell currentCell, List<Cell> neighbours)
+    public void checkLeftNeighbour(Cell currentCell, List<Cell> neighbours)
     {
         if (currentCell.getX() >= 1)
         {
@@ -121,7 +123,7 @@ public class Maze {
     }
 
 
-    private void checkRightNeighbour(Cell currentCell, List<Cell> neighbours)
+    public void checkRightNeighbour(Cell currentCell, List<Cell> neighbours)
     {
         if (currentCell.getX() < width - 1)
         {
@@ -135,7 +137,7 @@ public class Maze {
     }
 
 
-    private void checkTopNeighbour(Cell currentCell, List<Cell> neighbours)
+    public void checkTopNeighbour(Cell currentCell, List<Cell> neighbours)
     {
         if (currentCell.getY() >= 1)
         {
@@ -151,7 +153,7 @@ public class Maze {
 
 
 
-    private void checkBottomNeighbour(Cell currentCell, List<Cell> neighbours)
+    public void checkBottomNeighbour(Cell currentCell, List<Cell> neighbours)
     {
         if (currentCell.getY() < height - 1)
         {
@@ -170,7 +172,20 @@ public class Maze {
             cell.setWall(Wall.ALL);
             cell.setSteps(0);
             cell.setType(CellType.EMPTY);
+            cell.setVisited(false);
         }
+    }
+
+    private void markEndPoints() {
+        Arrays.stream(cells)
+                .max(Comparator.comparingInt(Cell::getSteps))
+                .get()
+                .setType(CellType.EXIT);
+
+        Arrays.stream(cells)
+                .min(Comparator.comparingInt(Cell::getSteps))
+                .get()
+                .setType(CellType.START);
     }
 
 

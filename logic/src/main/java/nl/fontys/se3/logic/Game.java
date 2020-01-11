@@ -13,6 +13,7 @@ public class Game {
         currentMaxId = 1;
     }
 
+    //TODO: automatically add player when creating room?
     public Room createRoom(int limit, int playerScore, RoomDifficulty difficulty) {
         Room room = new Room(currentMaxId++, limit, playerScore, difficulty);
         rooms.add(room);

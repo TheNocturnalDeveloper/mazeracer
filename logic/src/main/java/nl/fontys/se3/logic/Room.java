@@ -125,7 +125,7 @@ public class Room {
 
                 switch (cell.getType()) {
                     case EXIT:
-                        client.getValue().NotifyPlayerWon(username);
+                        client.getValue().notifyPlayerWon(username);
                         break;
                     case BONUS:
                         client.getValue().removeBonus(coord);

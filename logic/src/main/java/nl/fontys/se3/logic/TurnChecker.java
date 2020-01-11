@@ -2,7 +2,7 @@ package nl.fontys.se3.logic;
 
 import java.util.List;
 
-class TurnChecker {
+public class TurnChecker {
     private int turnIndex = 0;
     private List<String> players;
 

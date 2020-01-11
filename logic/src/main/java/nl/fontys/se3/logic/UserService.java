@@ -1,15 +1,15 @@
 package nl.fontys.se3.logic;
 
-import nl.fontys.se3.data.UserDAO;
+import nl.fontys.se3.data.IUserDAO;
 import nl.fontys.se3.data.UserDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class UserService {
-    private final UserDAO db;
+    private final IUserDAO db;
 
-    public UserService(UserDAO db) {
+    public UserService(IUserDAO db) {
         this.db = db;
     }
 
@@ -23,7 +23,11 @@ public class UserService {
 
     public User getUserByName(String username) {
        UserDTO user = db.getPlayerByName(username);
-       return  new User(user.getUsername(), user.getPassword(), user.getScore());
+       if(user != null) {
+           return new User(user.getUsername(), user.getPassword(), user.getScore());
+       }
+
+       return null;
     }
 
     public List<User> getAllUsers() {

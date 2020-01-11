@@ -9,6 +9,7 @@ import io.javalin.plugin.openapi.OpenApiPlugin;
 import io.javalin.plugin.openapi.dsl.OpenApiBuilder;
 import io.javalin.plugin.openapi.dsl.OpenApiDocumentation;
 import io.javalin.plugin.openapi.ui.SwaggerOptions;
+import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
 
 import java.io.BufferedReader;
@@ -18,7 +19,6 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import io.swagger.v3.oas.models.info.Info;
@@ -27,8 +27,6 @@ import nl.fontys.se3.data.UserDAO;
 import nl.fontys.se3.logic.*;
 import nl.fontys.se3.presentation.models.*;
 import org.eclipse.jetty.server.session.SessionHandler;
-
-import javax.servlet.http.HttpSession;
 
 
 public class Main {
@@ -46,11 +44,6 @@ public class Main {
         JavalinJackson.configure(JavalinJackson.getObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
 
 
-        //https://github.com/tipsy/javalin/blob/a27b600c7418e7ec766d126e1d13e9129312fc2a/src/main/java/io/javalin/websocket/JavalinWsServlet.kt
-        //https://github.com/tipsy/javalin/blob/7165cca105860df938c402a875f1f855dba208be/src/main/java/io/javalin/Javalin.java
-
-        //TODO: new idea make a class that inherrits from javalinwsservlet and manually move http session to websocket?
-
 
         SessionHandler sessionHandler = new SessionHandler();
         sessionHandler.setHttpOnly(true);
@@ -59,8 +52,6 @@ public class Main {
             config.addStaticFiles("web");
             config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
             config.sessionHandler(() -> sessionHandler);
-            //maybe ws context can somehow access app attributes
-            // config.inner.appAttributes.put(SessionHandler.class, sessionHandler);
 
         }).start(80);
 
@@ -74,6 +65,11 @@ public class Main {
 
             User user =  ctx.sessionAttribute("user");
 
+            if(user == null) {
+                ctx.redirect("/");
+                return;
+            }
+
             Room room = game.findRoom(user);
 
             if(room == null || !room.addPlayer(user.getUsername())) {
@@ -81,7 +77,6 @@ public class Main {
             }
             room.addPlayer(user.getUsername());
             ctx.redirect("/game/" + room.getId());
-            //TODO: automatically add player when creating room?
 
         });
 
@@ -104,17 +99,6 @@ public class Main {
         app.get("generate-maze", OpenApiBuilder.documented(mazeDocumentation, ctx -> {
            Maze maze = new Maze(10, 10);
            maze.generateMaze();
-
-           //TODO: MOVE START, EXIT AND BONUS SELECTION TO MAZE
-           Arrays.stream(maze.getCells())
-                   .max(Comparator.comparingInt(Cell::getSteps))
-                   .get()
-                   .setType(CellType.EXIT);
-
-            Arrays.stream(maze.getCells())
-                    .min(Comparator.comparingInt(Cell::getSteps))
-                    .get()
-                    .setType(CellType.START);
 
             var cells = Arrays.stream(maze.getCells())
                     .map(c -> new CellModel(c.getX(), c.getY(), c.getType().value, c.getWalls()))
@@ -171,18 +155,11 @@ public class Main {
 
         app.ws("/ws/:id", ws -> {
             ws.onConnect(ctx -> {
-                //app.config.inner.sessionHandler.getHttpSession()
-                //TODO: check if player is logged in
-
-                String sessionId = ctx.cookie("JSESSIONID");
-                HttpSession session = sessionHandler.getHttpSession(sessionId);
-                User user = (User) session.getAttribute("user");
+                User user = getSessionUser(app, ctx);
 
                 ctx.attribute("user", user);
 
-                Integer roomId = wrapException(() -> {
-                    return ctx.pathParam("id", Integer.class).getOrNull();
-                });
+                Integer roomId = wrapException(() -> ctx.pathParam("id", Integer.class).getOrNull());
 
                 if(roomId == null) {
                     ctx.send(new BasicMessage(MessageType.NO_ROOM));
@@ -207,12 +184,12 @@ public class Main {
                     return;
                 }
 
+                room.start();
+
             });
 
             ws.onClose(ctx -> {
-                Integer roomId = wrapException(() -> {
-                    return ctx.pathParam("id", Integer.class).getOrNull();
-                });
+                Integer roomId = wrapException(() -> ctx.pathParam("id", Integer.class).getOrNull());
 
                 if(roomId == null) {
                     return;
@@ -233,9 +210,7 @@ public class Main {
             });
 
             ws.onMessage(ctx -> {
-                Integer roomId = wrapException(() -> {
-                    return ctx.pathParam("id", Integer.class).getOrNull();
-                });
+                Integer roomId = wrapException(() -> ctx.pathParam("id", Integer.class).getOrNull());
 
                 if(roomId == null) {
                     return;
@@ -282,6 +257,19 @@ public class Main {
                 break;
         }
     }
+
+    private static User getSessionUser(Javalin app, WsContext ctx) {
+        try {
+            var sessionId = ctx.cookie("JSESSIONID");
+            var session = app.config.inner.sessionHandler.getHttpSession(sessionId);
+            return (User) session.getAttribute("user");
+        }
+        catch (Exception e) {
+            return null;
+        }
+
+    }
+
 
     /**
      * Reads given resource file as a string.

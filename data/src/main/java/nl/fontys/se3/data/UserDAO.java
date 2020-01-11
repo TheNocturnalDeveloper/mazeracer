@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class UserDAO {
+public class UserDAO implements IUserDAO {
 
     private static String host = "127.0.01";
     private static String user = "root";
@@ -27,7 +27,7 @@ public class UserDAO {
 
     }
 
-
+    @Override
     public List<UserDTO> getAllUsers() {
 
         List<UserDTO> users = new ArrayList();
@@ -72,6 +72,7 @@ public class UserDAO {
 
     }
 
+    @Override
     public UserDTO getPlayerByName(String username) {
         UserDTO user = null;
         ResultSet rset = null;
@@ -114,6 +115,7 @@ public class UserDAO {
 
     }
 
+    @Override
     public void updatePlayerScore(String username, int score) {
         try (
                 Connection conn = this.getConnection();
@@ -121,7 +123,7 @@ public class UserDAO {
         ) {
             stmt.executeUpdate(
                     String.format("UPDATE user SET score = %d WHERE username = '%s'",
-                            username, score)
+                            score, username)
             );
 
             LOGGER.log( Level.FINE, "Affected rows: {0}", stmt.getUpdateCount());
@@ -132,6 +134,7 @@ public class UserDAO {
 
     }
 
+    @Override
     public void insertPlayer(UserDTO player) {
         try (
                 Connection conn = this.getConnection();
@@ -150,6 +153,7 @@ public class UserDAO {
 
     }
 
+    @Override
     public UserDTO checkCredentials(String username, String password) {
         var player = getPlayerByName(username);
 

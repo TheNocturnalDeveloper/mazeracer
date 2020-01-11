@@ -12,7 +12,7 @@ public class ClientPlaceHolder implements IMazeRacerClient {
     }
 
     @Override
-    public void NotifyPlayerWon(String username) {
+    public void notifyPlayerWon(String username) {
         throw new UnsupportedOperationException();
     }
 

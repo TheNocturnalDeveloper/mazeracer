@@ -29,7 +29,7 @@ public class WebSocketMazeRacerClient implements IMazeRacerClient {
     }
 
     @Override
-    public void NotifyPlayerWon(String username) {
+    public void notifyPlayerWon(String username) {
         context.send(new PlayerWonMessage(username));
     }
 
