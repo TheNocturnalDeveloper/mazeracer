@@ -1,18 +1,0 @@
-
-rsquid:S1602"SRemove useless curly braces around statement and then remove useless return keyword(©‚Îõ8­Í¤Äê-
-Vsquid:S1135¿"2Complete the task associated to this TODO comment.(öÑëèùÿÿÿÿ8úëæ­ì-
-Osquid:S16022",Remove useless curly braces around statement(–‰¢ıúÿÿÿÿ8úëæ­ì-
-ksquid:UselessImportCheck";Remove this unused import 'io.javalin.websocket.WsContext'.(Ÿû©áşÿÿÿÿ8†º–è-
-osquid:UselessImportCheck"?Remove this unused import 'io.javalin.http.BadRequestResponse'.(Åù¦€ûÿÿÿÿ8úëæ­ì-
-osquid:UselessImportCheck"?Remove this unused import 'io.javalin.plugin.json.JavalinJson'.(…Àú¼ıÿÿÿÿ8úëæ­ì-
-Osquid:S1135["2Complete the task associated to this TODO comment.(¾Ô8úëæ­ì-
-[squid:UselessImportCheck"0Remove this unused import 'java.util.ArrayList'.(÷‰îƒ8†º–è-
-Hsquid:S1481q"*Remove this unused "login" local variable.(½¡í÷8ÃöÄÎê-
-Vsquid:S1135È"2Complete the task associated to this TODO comment.(ÒğŒÄùÿÿÿÿ8úëæ­ì-
-_squid:UselessImportCheck"4Remove this unused import 'java.lang.reflect.Array'.(‡¡É˜8ä®ì-
-Psquid:S1135I"2Complete the task associated to this TODO comment.(à›œÇ8úëæ­ì-
-rsquid:S1602"SRemove useless curly braces around statement and then remove useless return keyword(©‚Îõ8­Í¤Äê-
-Psquid:S1481{"-Remove this unused "register" local variable.(å¯˜ûÿÿÿÿ8®ñ¬Ğê-
-rsquid:S1602˜"SRemove useless curly braces around statement and then remove useless return keyword(©‚Îõ8­Í¤Äê-
-hsquid:S1192-"JDefine a constant instead of duplicating this literal "text/html" 3 times.(ÊƒåÅ8úëæ­ì-
-[squid:UselessImportCheck"+Remove this unused import 'java.util.List'.(Õë±Äøÿÿÿÿ8†º–è-
