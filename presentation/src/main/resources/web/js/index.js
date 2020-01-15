@@ -144,7 +144,6 @@ class Grid {
     }
 
     canMoveTo(dir) {
-      //todo: bounds check breaks movement??
       const playerPos = this.player.coord;
       const playerCell = this.cells[this.getIndex(playerPos)];
 
@@ -275,11 +274,11 @@ function render() {
 }
 
 
-async function loadMaze() {
-
-  const maze = await (await fetch("/generate-maze")).json();
-
-  grid.applyGridState(maze);
+// async function loadMaze() {
+//
+//   const maze = await (await fetch("/generate-maze")).json();
+//
+//   grid.applyGridState(maze);
 
   document.addEventListener("keydown", event => {
     if (event.key === "ArrowLeft") {
@@ -303,16 +302,38 @@ async function loadMaze() {
       }
     }
   });
-
-}
-
-
-loadMaze()
-    .then(() => console.log("maze loaded."))
-    .catch(() => console.error("maze could not be loaded."));
+//
+// }
+//
+//
+// loadMaze()
+//     .then(() => console.log("maze loaded."))
+//     .catch(() => console.error("maze could not be loaded."));
 
 requestAnimationFrame(render);
 let socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/ws/" +  window.location.pathname.split("/").pop());
 socket.onmessage = e => {
-    console.log(e.data);
+    const data = JSON.parse(e.data)
+    if(data.type === "LOAD_MAZE") {
+        grid.applyGridState(data.cells);
+    }
+    else if(data.type === "PLAYER_JOINED") {
+
+    }
+    else if(data.type === "REMOVE_BONUS") {
+        grid.cells[grid.getIndex(new Coord(data.x, data.y))].setCellType(CellType.empty);
+    }
+    else if(data.type === "NO_ROOM") {
+        alert("something went wrong, please return to matchmaking");
+    }
+    else if(data.type === "PLAYER_WON") {
+        alert(`the player ${data.message} has won`);
+    }
+    else if(data.type === "RESET_POSITION") {
+        grid.player.coord.x = data.x;
+        grid.player.coord.y = data.y;
+    }
+    else if(data.type === "PLAYER_LEFT") {
+
+    }
 }
