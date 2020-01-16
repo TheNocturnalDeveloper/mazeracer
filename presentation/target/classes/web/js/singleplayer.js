@@ -19,15 +19,18 @@ const ctx = canvas.getContext("2d");
 async function loadMaze() {
 
   const maze = await (await fetch("/generate-maze")).json();
-
   grid.applyGridState(maze);
-
+  player.coord.x = grid.startPos.x;
+  player.coord.y = grid.startPos.y;
 
 }
 
 
 loadMaze()
-    .then(() => console.log("maze loaded."))
+    .then(() =>  {
+        requestAnimationFrame(render);
+        console.log("maze loaded.");
+    })
     .catch(() => console.error("maze could not be loaded."));
 
 
@@ -52,9 +55,31 @@ document.addEventListener("keydown", event => {
             grid.player.coord.y -= 1;
         }
     }
+
+    if(grid.cells[grid.getIndex(player.coord)].type === CellType.exit) {
+        loadMaze();
+    }
 });
 
+function drawLine(context, start, end, width, color) {
+    context.beginPath();
+    context.lineWidth = width;
+    context.strokeStyle = color;
+    context.moveTo(start.x, start.y);
+    context.lineTo(end.x, end.y);
+    context.stroke(); // Draw it
+}
 
+function fillCircle(context, start, radius, color) {
+
+    const x = start.x + radius;
+    const y = start.y  + radius;
+
+    context.beginPath();
+    context.arc(x, y, radius, 0, 2 * Math.PI, false);
+    context.fillStyle = color;
+    context.fill();
+}
 
 
 function render() {
@@ -113,4 +138,3 @@ function render() {
 }
 
 
-requestAnimationFrame(render);

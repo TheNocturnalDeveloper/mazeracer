@@ -101,6 +101,7 @@ class Grid {
         this.cells = [];
         this.player = player;
         this.oponents = [];
+        this.startPos = new Coord(0,0);
 
 
         for(let y = 0; y < this.height; y++) {
@@ -121,8 +122,8 @@ class Grid {
             this.cells[i].setCellType(state.type);
 
             if(state.type === CellType.start) {
-                this.player.coord.x = state.x;
-                this.player.coord.y = state.y;
+                this.startPos.x = state.x;
+                this.startPos.y = state.y;
             }
         }
     }
@@ -136,6 +137,10 @@ class Grid {
 
     addOpponent(opponent) {
         this.oponents.push(opponent)
+    }
+
+    removeOpponent(id) {
+        this.oponents.splice(this.oponents.indexOf(this.oponents.filter(i => i.id === id)[0]), 1);
     }
 
 

@@ -16,10 +16,12 @@ import static nl.fontys.se3.presentation.Utils.getResourceFileAsString;
 public class IndexController {
     private String indexPage;
     private String leaderboardPage;
+    private String singlePlayerPage;
 
     public IndexController() throws IOException {
         indexPage = getResourceFileAsString(IndexController.class,"/web/landing.html");
         leaderboardPage = getResourceFileAsString(IndexController.class,"/web/leaderboard.html");
+        singlePlayerPage = getResourceFileAsString(IndexController.class,"/web/singleplayer.html");
     }
 
     @OpenApi(
@@ -81,8 +83,8 @@ public class IndexController {
             }
     )
     public void singlePlayer(Context ctx) {
-        //ctx.contentType("text/html");
-        //ctx.result(SinglePlayerPage);
+        ctx.contentType("text/html");
+        ctx.result(singlePlayerPage);
     }
 
 }
