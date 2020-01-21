@@ -119,9 +119,11 @@ socket.onmessage = e => {
     }
     else if(data.type === "NO_ROOM") {
         alert("something went wrong, please return to matchmaking");
+        window.location = "/";
     }
     else if(data.type === "PLAYER_WON") {
         alert(`the player ${data.message} has won`);
+        window.location = "/";
     }
     else if(data.type === "RESET_POSITION") {
         grid.player.coord.x = data.x;
@@ -130,7 +132,13 @@ socket.onmessage = e => {
     else if(data.type === "PLAYER_LEFT") {
         grid.removeOpponent(data.message);
     }
-}
+    else if(data.type === "MOVE") {
+        const opponent = grid.getOpponent(data.username);
+        opponent.coord.x = data.x;
+        opponent.coord.y = data.y;
+    }
+
+};
 
 
 
@@ -162,6 +170,15 @@ document.addEventListener("keydown", event => {
     }
 
     if(moved) {
-        socket.send()
+        const cell = grid.cells[grid.getIndex(grid.player.coord)];
+        if(cell.type === CellType.bonus) {
+            cell.setCellType(CellType.empty);
+        }
+
+        socket.send(JSON.stringify({
+            "type" : "MOVE",
+            "x": grid.player.coord.x,
+            "y": grid.player.coord.y,
+        }))
     }
 });
