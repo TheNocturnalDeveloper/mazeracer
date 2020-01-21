@@ -23,6 +23,7 @@ import java.io.IOException;
 import static io.javalin.apibuilder.ApiBuilder.*;
 import static nl.fontys.se3.presentation.Utils.wrapException;
 
+
 public class Main {
 
     private static OpenApiOptions getOpenApiOptions() {
@@ -57,7 +58,7 @@ public class Main {
         IndexController indexController = new IndexController();
         UserController userController = new UserController(userService);
         RoomController roomController = new RoomController(game);
-        WsController wsController = new WsController(app.config.inner.sessionHandler, game);
+        WsController wsController = new WsController(app.config.inner.sessionHandler, game, userService);
 
         app.routes(() -> {
            get("/", indexController::index);
