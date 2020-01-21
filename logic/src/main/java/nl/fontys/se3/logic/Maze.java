@@ -6,7 +6,8 @@ public class Maze {
     private Cell[] cells;
     private int width;
     private int height;
-
+    private Cell start;
+    private Cell end;
 
     public Maze(int width, int height) {
         this.width = width;
@@ -27,6 +28,8 @@ public class Maze {
 
     public void generateMaze(Random random) {
         Cell current  = cells[random.nextInt(cells.length)];
+        start = current;
+        end = current;
 
         var cellStack = new Stack<Cell>();
 
@@ -48,12 +51,16 @@ public class Maze {
             {
                 //remove the top value of the stack and assign the new top value of the stack to the current cell
                 cellStack.pop();
-                current = cellStack.peek();
+                current = cellStack.peek(); //TODO: NULL POINTER
                 continue;
             }
 
             var neighbour = neighbours.get(random.nextInt(neighbours.size()));
             //get the cell between the current cell and the neighbour, and remove the wall from the cell.
+
+            if(random.nextInt(100) < 4) {
+                neighbour.setType(CellType.BONUS);
+            }
 
             removeWalls(current, neighbour);
 
@@ -63,6 +70,10 @@ public class Maze {
 
             //set the amount of steps from the start on the wall and the neighbour.
             neighbour.setSteps(current.getSteps() + 1);
+
+            if(neighbour.getSteps() > end.getSteps()) {
+                end = neighbour;
+            }
 
             //put the neighbour on the stack and set the current cell to the neighbour.
             cellStack.push(neighbour);
@@ -177,15 +188,8 @@ public class Maze {
     }
 
     private void markEndPoints() {
-        Arrays.stream(cells)
-                .max(Comparator.comparingInt(Cell::getSteps))
-                .get()
-                .setType(CellType.EXIT);
-
-        Arrays.stream(cells)
-                .min(Comparator.comparingInt(Cell::getSteps))
-                .get()
-                .setType(CellType.START);
+        start.setType(CellType.START);
+        end.setType(CellType.EXIT);
     }
 
 
@@ -197,4 +201,11 @@ public class Maze {
         return cells[getIndex(x,y)];
     }
 
+    public Cell getStart() {
+        return start;
+    }
+
+    public Cell getEnd() {
+        return end;
+    }
 }
