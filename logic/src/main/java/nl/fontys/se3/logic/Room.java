@@ -1,18 +1,25 @@
 package nl.fontys.se3.logic;
 
-import java.util.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class Room {
     private final int id;
     private final int limit;
     private final int roomScore;
-    private Map<String, IMazeRacerClient> players;
+
+    private Map<String, ClientContext> players;
     private Maze maze;
     private  MoveChecker moveChecker;
     private RoomDifficulty difficulty;
-    //private TurnChecker turnChecker;
+    private GameStatus status;
+    private List<String> matchResult = null;
 
+    private static final int bonusValue = 5_000;
 
     public Room(int id, int limit, int roomScore, RoomDifficulty difficulty) {
         this.id = id;
@@ -27,7 +34,7 @@ public class Room {
         maze = new Maze(mazeSize, mazeSize);
         moveChecker = new MoveChecker(maze);
 
-        //TODO: add turn based mode?
+        status = GameStatus.PENDING;
     }
 
     public int getId() {
@@ -46,35 +53,44 @@ public class Room {
         return difficulty;
     }
 
-    public Map<String, IMazeRacerClient> getPlayers() {
+    public Map<String, ClientContext> getPlayers() {
         return Collections.unmodifiableMap(players);
     }
+    public GameStatus getStatus() { return status; }
 
 
-    public boolean addPlayer(String username) {
+    public synchronized boolean addPlayer(String username) {
         if(players.size() >= limit) return false;
-        players.put(username, new ClientPlaceHolder());
-
+        players.put(username, new ClientContext());
         return true;
     }
 
     public boolean enter(String username, IMazeRacerClient client) {
         if(!players.containsKey(username)) return false;
-
-        players.replace(username, client);
+        players.get(username).setClient(client);
 
         return true;
     }
 
     public boolean isFull() {
-        return players.size() >= limit;
+        return players.values().stream().filter(c -> c.getClient() != null).count() >= limit;
     }
 
     public void start() {
         maze.generateMaze();
-        for (IMazeRacerClient client: players.values()) {
-            client.loadMaze(maze.getCells());
+        for (var client: players.entrySet()) {
+            client.getValue().getClient().loadMaze(maze.getCells());
+            //TODO: CLEAN THIS UP
+            client.getValue().getPos().setX(maze.getStart().getX());
+            client.getValue().getPos().setY(maze.getStart().getY());
+
+            for(String name: players.keySet()) {
+                if(!name.equals(client.getKey())) {
+                    client.getValue().getClient().addEnemy(name);
+                }
+            }
         }
+        status = GameStatus.STARTED;
     }
 
     public void removePlayer(String username) {
@@ -82,61 +98,67 @@ public class Room {
         players.remove(username);
 
         for (var client: players.entrySet()) {
-            client.getValue().removeEnemy(username);
+            client.getValue().getClient().removeEnemy(username);
         }
     }
 
-    //TODO: CLEAN UP MOVE PLAYER (MAYBE DIVIDE INTO MULTIPLE METHODS)
-    public void movePlayer(String username, Coord coord) {
-        //TODO: think of a way to store player coords and bonuses
-        //TODO: return game state, the websocket controller can remove the room and save changes based on the state
+
+    private void updatePlayers(String username, Coord coord, Cell cell) {
+        for (var client: players.entrySet()) {
+            if(!username.equals(client.getKey())) {
+                client.getValue().getClient().moveEnemy(username, coord);
+
+                if(cell.getType() == CellType.BONUS) {
+                    client.getValue().getClient().removeBonus(coord);
+                }
+            }
+        }
+    }
 
 
-        IMazeRacerClient player = players.get(username);
+    public synchronized void movePlayer(String username, Coord coord) {
+        ClientContext player = players.get(username);
 
-        if(!moveChecker.checkMove(new Coord(0,0), coord)) {
-            player.resetPosition(new Coord(0,0));
+        if(!moveChecker.checkMove(player.getPos(), coord)) {
+            player.getClient().resetPosition(player.getPos());
             return;
         }
+
+        player.getPos().setX(coord.getX());
+        player.getPos().setY(coord.getY());
 
         Cell cell = maze.get(coord.getX(), coord.getY());
 
         switch (cell.getType()) {
             case EXIT:
+                player.setEndTime(System.currentTimeMillis());
                 break;
             case BONUS:
+                player.incrementBonusCount();
+                maze.get(coord.getX(), coord.getY()).setType(CellType.EMPTY);
                 break;
             default:
                 break;
         }
 
-        for (var client: players.entrySet()) {
+        updatePlayers(username, coord, cell);
 
+        if(players.values().stream().allMatch(ClientContext::hasFinished)) {
+            status = GameStatus.OVER;
 
+            matchResult = players.entrySet().stream().sorted((a, b) -> {
+                long scoreA = a.getValue().calculateScore(bonusValue);
+                long scoreB = b.getValue().calculateScore(bonusValue);
+                return  Long.compare(scoreA, scoreB);
+            }).map(Map.Entry::getKey).collect(Collectors.toList()); //method update match result
 
-            if(!username.equals(client.getKey())) {
-                /*
-                    TODO:
-                        perhaps the add player message can include the coordinates of the first move?
-                 */
-
-                //client.getValue().addEnemy(client.getKey());
-                client.getValue().moveEnemy(client.getKey(), coord);
-
-                switch (cell.getType()) {
-                    case EXIT:
-                        client.getValue().notifyPlayerWon(username);
-                        break;
-                    case BONUS:
-                        client.getValue().removeBonus(coord);
-                        break;
-                    default:
-                        break;
-                }
-
+            for (var client: players.entrySet()) {
+                client.getValue().getClient().notifyPlayerWon(matchResult.get(0)); //move this to update players
             }
         }
+    }
 
-        //return game state
+    public List<String> getMatchResult() {
+        return Collections.unmodifiableList(matchResult);
     }
 }

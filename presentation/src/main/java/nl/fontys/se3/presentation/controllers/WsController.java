@@ -4,10 +4,7 @@ import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
-import nl.fontys.se3.logic.Coord;
-import nl.fontys.se3.logic.Game;
-import nl.fontys.se3.logic.Room;
-import nl.fontys.se3.logic.User;
+import nl.fontys.se3.logic.*;
 import nl.fontys.se3.presentation.WebSocketMazeRacerClient;
 import nl.fontys.se3.presentation.models.BasicMessage;
 import nl.fontys.se3.presentation.models.MessageType;
@@ -15,15 +12,19 @@ import nl.fontys.se3.presentation.models.PlayerMoveMessage;
 import nl.fontys.se3.presentation.models.StringMessage;
 import org.eclipse.jetty.server.session.SessionHandler;
 
+import java.util.List;
+
 import static nl.fontys.se3.presentation.Utils.wrapException;
 
 public class WsController {
     private SessionHandler handler;
     private Game game;
+    private UserService userService;
 
-    public WsController(SessionHandler handler, Game game) {
+    public WsController(SessionHandler handler, Game game, UserService userService) {
         this.handler = handler;
         this.game = game;
+        this.userService = userService;
     }
 
     public void connect(WsConnectContext ctx) {
@@ -41,7 +42,7 @@ public class WsController {
 
         if(roomId == null) {
             ctx.send(new BasicMessage(MessageType.NO_ROOM));
-            ctx.session.close(4000, "invalid room id, could not parse int");
+            ctx.session.close(4001, "invalid room id, could not parse int");
             return;
         }
 
@@ -49,7 +50,7 @@ public class WsController {
 
         if(room == null) {
             ctx.send(new BasicMessage(MessageType.NO_ROOM));
-            ctx.session.close(4000, "room not available");
+            ctx.session.close(4002, "room not available");
             return;
         }
 
@@ -58,9 +59,11 @@ public class WsController {
 
         if(!room.enter(user.getUsername(), playerClient)) {
             ctx.send(new BasicMessage(MessageType.NO_ROOM));
-            ctx.session.close(4000, "player not in room");
+            ctx.session.close(4003, "player not in room");
+            return;
         }
 
+        if(room.isFull()) room.start(); //start in new thread with delay
     }
 
     public void message(WsMessageContext ctx) {
@@ -75,7 +78,12 @@ public class WsController {
         if(room == null) {
             return;
         }
+
         processMessage(room, ctx);
+
+        if(room.getStatus() == GameStatus.OVER) {
+            saveMatchResults(room);
+        }
     }
 
     public void close(WsCloseContext ctx) {
@@ -92,6 +100,19 @@ public class WsController {
         }
 
         User user = ctx.attribute("user");
+
+        if (user == null) {
+            return;
+        }
+
+       if(room.getStatus() == GameStatus.STARTED) {
+           var dbUser = userService.getUserByName(user.getUsername());
+
+           int score = dbUser.getScore() - 5 >= 0 ? -dbUser.getScore() : -5;
+           userService.updateScore(dbUser, score);
+       }
+
+
         room.removePlayer(user.getUsername());
 
         if(room.getPlayers().isEmpty()) {
@@ -100,6 +121,25 @@ public class WsController {
     }
 
 
+    private void saveMatchResults(Room room) {
+        List<String> results = room.getMatchResult();
+        for(int i = 0; i < results.size(); i++) {
+            User user = userService.getUserByName(results.get(i));
+            var dbUser = userService.getUserByName(user.getUsername());
+
+            if(i == 0) {
+                //winner
+                userService.updateScore(dbUser, 10);
+
+            }
+            else {
+                //loser
+                int score = dbUser.getScore() - 5 >= 0 ? -dbUser.getScore() : -5;
+                userService.updateScore(dbUser, score);
+
+            }
+        }
+    }
 
     private  User getSessionUser(WsContext ctx) {
         try {
