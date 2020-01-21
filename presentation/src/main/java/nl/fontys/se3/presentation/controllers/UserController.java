@@ -98,8 +98,16 @@ public class UserController {
     public void registerPlayer(Context ctx) {
         User user = null;
 
+
+
         try {
             var register = readForm(ctx, RegisterModel.class);
+
+            if(register.getPassword().length() <= 8) {
+                ctx.redirect("");
+                return;
+            }
+
             service.insertUser(new User(register.getUsername(), register.getPassword(), 0));
             user = service.checkCredentials(register.getUsername(), register.getPassword());
         } catch (Exception ignore) {
