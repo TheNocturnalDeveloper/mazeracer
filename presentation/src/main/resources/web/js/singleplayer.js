@@ -35,29 +35,41 @@ loadMaze()
 
 
 document.addEventListener("keydown", event => {
+    let moved = false;
     if (event.key === "ArrowLeft") {
         if(grid.canMoveTo(Direction.left)) {
             grid.player.coord.x -= 1;
+            moved = true;
         }
     }
     else if (event.key === "ArrowRight") {
         if(grid.canMoveTo(Direction.right)) {
             grid.player.coord.x += 1;
+            moved = true;
         }
     }
     else if(event.key === "ArrowDown") {
         if(grid.canMoveTo(Direction.down)) {
             grid.player.coord.y += 1;
+            moved = true;
         }
     }
     else if(event.key === "ArrowUp") {
         if(grid.canMoveTo(Direction.top)) {
             grid.player.coord.y -= 1;
+            moved = true;
         }
     }
 
-    if(grid.cells[grid.getIndex(player.coord)].type === CellType.exit) {
-        loadMaze();
+    if(moved) {
+        let cell = grid.cells[grid.getIndex(player.coord)];
+
+        if (cell.type === CellType.exit) {
+            loadMaze();
+        }
+        else if (cell.type === CellType.bonus) {
+            cell.type = CellType.empty;
+        }
     }
 });
 
