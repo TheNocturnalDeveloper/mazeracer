@@ -59,7 +59,7 @@ public class RoomController {
             room = game.createRoom(2, user.getScore(), RoomDifficulty.EASY);
         }
         room.addPlayer(user.getUsername());
-        ctx.redirect("/game/" + room.getId());
+        ctx.redirect("/rooms/join/" + room.getId());
     }
 
     @OpenApi(
