@@ -3,19 +3,25 @@ package nl.fontys.se3.data;
 public class UserDTO {
     private final String username;
     private final String password;
-    private int score;
+    private int easyScore;
+    private int mediumScore;
+    private int hardScore;
 
-
-    public UserDTO(String username, String password, int score) {
+    public UserDTO(String username, String password, int easyScore, int mediumScore, int hardScore) {
         this.username = username;
         this.password = password;
-        this.score = score;
+
+        this.easyScore = easyScore;
+        this.mediumScore = mediumScore;
+        this.hardScore = hardScore;
     }
 
     public UserDTO(String username, String password) {
         this.username = username;
         this.password = password;
-        this.score = 0;
+        this.easyScore = 0;
+        this.mediumScore = 0;
+        this.hardScore = 0;
     }
 
     public String getUsername() {
@@ -28,10 +34,10 @@ public class UserDTO {
 
 
     public int getScore() {
-        return score;
+        return easyScore;
     }
 
     public void setScore(int score) {
-        this.score = score;
+       this.easyScore = score;
     }
 }

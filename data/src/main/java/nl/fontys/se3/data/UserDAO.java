@@ -46,7 +46,9 @@ public class UserDAO implements IUserDAO {
                 UserDTO p = new UserDTO(
                         rset.getString("username"),
                         rset.getString("password"),
-                        rset.getInt("score")
+                        rset.getInt("easy_score"),
+                        rset.getInt("medium_score"),
+                        rset.getInt("hard_score")
                 );
 
                 users.add(p);
@@ -79,10 +81,10 @@ public class UserDAO implements IUserDAO {
 
         try (
                 Connection conn = this.getConnection();
-                Statement stmt = conn.createStatement();
+                PreparedStatement selectStatement = conn.prepareStatement("select * from user WHERE username = ?;");
         ) {
-            String strSelect = String.format("select * from user WHERE username = '%s';", username);
-            rset = stmt.executeQuery(strSelect);
+            selectStatement.setString(1, username);
+            rset = selectStatement.executeQuery();
 
             LOGGER.log( Level.FINEST, "The records selected are:");
 
@@ -91,7 +93,9 @@ public class UserDAO implements IUserDAO {
                 UserDTO p = new UserDTO(
                         rset.getString("username"),
                         rset.getString("password"),
-                        rset.getInt("score")
+                        rset.getInt("easy_score"),
+                        rset.getInt("medium_score"),
+                        rset.getInt("hard_score")
                 );
 
                 LOGGER.log( Level.FINE, "UserDTO GetByName: {0}" , p);
@@ -119,14 +123,12 @@ public class UserDAO implements IUserDAO {
     public void updatePlayerScore(String username, int score) {
         try (
                 Connection conn = this.getConnection();
-                Statement stmt = conn.createStatement();
+                PreparedStatement updateStatement = conn.prepareStatement("UPDATE user SET easy_score = ? WHERE username = ?");
         ) {
-            stmt.executeUpdate(
-                    String.format("UPDATE user SET score = %d WHERE username = '%s'",
-                            score, username)
-            );
-
-            LOGGER.log( Level.FINE, "Affected rows: {0}", stmt.getUpdateCount());
+            updateStatement.setInt(1 ,score);
+            updateStatement.setString(2, username);
+            updateStatement.executeUpdate();
+            LOGGER.log( Level.FINE, "Affected rows: {0}", updateStatement.getUpdateCount());
 
         } catch (SQLException ex) {
             LOGGER.log( Level.SEVERE, ex.toString(), ex );
@@ -138,14 +140,13 @@ public class UserDAO implements IUserDAO {
     public void insertPlayer(UserDTO player) {
         try (
                 Connection conn = this.getConnection();
-                Statement stmt = conn.createStatement();
-        ) {
-            stmt.executeUpdate(
-                    String.format("INSERT INTO user (username, password, score) VALUES ('%s', '%s', '%d')",
-                    player.getUsername(), player.getPassword(), player.getScore())
-            );
+                PreparedStatement insertStatement = conn.prepareStatement("INSERT INTO user (username, password) VALUES (?, ?)");
 
-            LOGGER.log( Level.FINE, "Affected rows: {0}", stmt.getUpdateCount());
+        ) {
+          insertStatement.setString(1, player.getUsername());
+          insertStatement.setString(2, player.getPassword());
+          insertStatement.execute();
+            LOGGER.log( Level.FINE, "Affected rows: {0}", insertStatement.getUpdateCount());
 
         } catch (SQLException ex) {
             LOGGER.log( Level.SEVERE, ex.toString(), ex );
