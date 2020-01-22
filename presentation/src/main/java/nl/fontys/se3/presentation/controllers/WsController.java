@@ -108,7 +108,7 @@ public class WsController {
        if(room.getStatus() == GameStatus.STARTED) {
            var dbUser = userService.getUserByName(user.getUsername());
 
-           int score = dbUser.getScore() - 5 >= 0 ? -dbUser.getScore() : -5;
+           int score = dbUser.getScore() - 5 <= 0 ? -dbUser.getScore() : -5;
            userService.updateScore(dbUser, score);
        }
 
@@ -134,7 +134,7 @@ public class WsController {
             }
             else {
                 //loser
-                int score = dbUser.getScore() - 5 >= 0 ? -dbUser.getScore() : -5;
+                int score = dbUser.getScore() - 5 <= 0 ? -dbUser.getScore() : -5;
                 userService.updateScore(dbUser, score);
 
             }
