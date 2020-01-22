@@ -103,12 +103,12 @@ public class Room {
     }
 
 
-    private void updatePlayers(String username, Coord coord, Cell cell) {
+    private void updatePlayers(String username, Coord coord, CellType type) {
         for (var client: players.entrySet()) {
             if(!username.equals(client.getKey())) {
                 client.getValue().getClient().moveEnemy(username, coord);
 
-                if(cell.getType() == CellType.BONUS) {
+                if(type == CellType.BONUS) {
                     client.getValue().getClient().removeBonus(coord);
                 }
             }
@@ -128,8 +128,9 @@ public class Room {
         player.getPos().setY(coord.getY());
 
         Cell cell = maze.get(coord.getX(), coord.getY());
+        CellType type = cell.getType();
 
-        switch (cell.getType()) {
+        switch (type) {
             case EXIT:
                 player.setEndTime(System.currentTimeMillis());
                 break;
@@ -141,7 +142,7 @@ public class Room {
                 break;
         }
 
-        updatePlayers(username, coord, cell);
+        updatePlayers(username, coord, type);
 
         if(players.values().stream().allMatch(ClientContext::hasFinished)) {
             status = GameStatus.OVER;

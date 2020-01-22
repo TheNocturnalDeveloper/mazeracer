@@ -25,10 +25,10 @@ public class Game {
     }
 
 
-    public Room findRoom(User user) {
+    public Room findRoom(User user, RoomDifficulty difficulty) {
         var result = rooms
                 .stream()
-                .filter(room -> room.getPlayers().size() < room.getLimit())
+                .filter(room -> room.getPlayers().size() < room.getLimit() && room.getDifficulty() == difficulty)
                 .min(Comparator.comparing(Room::getRoomScore, (r1, r2) -> {
 
             Integer diff1 = Math.abs(r1 - user.getScore());
