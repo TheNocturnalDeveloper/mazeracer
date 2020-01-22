@@ -25,7 +25,7 @@ const opponentColor = "purple";
 
 const CellSize = new Size(50, 50);
 const player = new Player(new Coord(0,0));
-const grid = new Grid(10, 10, player);
+let grid = new Grid(10, 10, player);
 
 const canvas  = document.querySelector("#canvas");
 canvas.width  = grid.width * CellSize.width;
@@ -103,6 +103,11 @@ let socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "
 socket.onmessage = e => {
     const data = JSON.parse(e.data)
     if(data.type === "LOAD_MAZE") {
+        let size = Math.sqrt(data.cells.length);
+        grid = new Grid(size, size, player);
+        canvas.width  = grid.width * CellSize.width;
+        canvas.height = grid.height * CellSize.height;
+
         grid.applyGridState(data.cells);
         grid.player.coord.x = grid.startPos.x;
         grid.player.coord.y = grid.startPos.y;

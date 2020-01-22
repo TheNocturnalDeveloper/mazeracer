@@ -34,6 +34,13 @@ public class RoomController {
             }
     )
     public void matchSettings(Context ctx) {
+        User user =  ctx.sessionAttribute("user");
+
+        if(user == null) {
+            ctx.redirect("/");
+            return;
+        }
+
         ctx.contentType("text/html");
         ctx.result(matchSettingsPage);
     }
@@ -43,6 +50,9 @@ public class RoomController {
             method = HttpMethod.POST,
             responses = {
                     @OpenApiResponse(status = "303", description = "looks for a match and redirects the user.")
+            },
+            queryParams = {
+                    @OpenApiParam(name = "difficulty", type = RoomDifficulty.class)
             }
     )
     public void findMatch(Context ctx) {
@@ -53,10 +63,14 @@ public class RoomController {
             return;
         }
 
-        Room room = game.findRoom(user);
+        RoomDifficulty difficulty = ctx.formParam("difficulty", RoomDifficulty.class).getOrNull();
+
+        if(difficulty == null) difficulty = RoomDifficulty.EASY;
+
+        Room room = game.findRoom(user, difficulty);
 
         if(room == null || !room.addPlayer(user.getUsername())) {
-            room = game.createRoom(2, user.getScore(), RoomDifficulty.EASY);
+            room = game.createRoom(2, user.getScore(), difficulty);
         }
         room.addPlayer(user.getUsername());
         ctx.redirect("/rooms/join/" + room.getId());
@@ -73,6 +87,14 @@ public class RoomController {
             }
     )
     public void joinGame(Context ctx) {
+
+        User user =  ctx.sessionAttribute("user");
+
+        if(user == null) {
+            ctx.redirect("/");
+            return;
+        }
+
         ctx.contentType("text/html");
         ctx.result(gamePage);
     }

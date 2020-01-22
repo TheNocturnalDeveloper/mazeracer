@@ -20,7 +20,7 @@ public class GameTest {
     @Test
     public void testFindRoomNoRooms() {
         User user = new User("test", "test", 0);
-        assertNull(game.findRoom(user));
+        assertNull(game.findRoom(user, RoomDifficulty.EASY));
     }
 
 
@@ -28,9 +28,16 @@ public class GameTest {
     public void testFindRoomOneRoom() {
         game.createRoom(2, 10, RoomDifficulty.EASY);
         User user = new User("test", "test", 0);
-        assertNotNull(game.findRoom(user));
+        assertNotNull(game.findRoom(user, RoomDifficulty.EASY));
     }
 
+
+    @Test
+    public void testFindRoomNoMatchingDifficulty() {
+        game.createRoom(2, 10, RoomDifficulty.HARD);
+        User user = new User("test", "test", 0);
+        assertNull(game.findRoom(user, RoomDifficulty.EASY));
+    }
 
     @Test
     public void testFindRoomMultipleRooms() {
@@ -38,7 +45,7 @@ public class GameTest {
         game.createRoom(2, 20, RoomDifficulty.EASY);
 
         User user = new User("test", "test", 16);
-        assertEquals(game.findRoom(user).getId(), 2);
+        assertEquals(game.findRoom(user, RoomDifficulty.EASY).getId(), 2);
     }
 
     @Test
