@@ -79,6 +79,7 @@ public class UserController {
             user = service.checkCredentials(login.getUsername(), login.getPassword());
         } catch (Exception ignored) {
             //failed to read login form, user will be null
+            ctx.redirect("/users/login");
         }
 
         if(user != null) {
@@ -103,8 +104,8 @@ public class UserController {
         try {
             var register = readForm(ctx, RegisterModel.class);
 
-            if(register.getPassword().length() <= 8) {
-                ctx.redirect("");
+            if(register.getPassword().length() < 8) {
+                ctx.redirect("/users/register");
                 return;
             }
 
