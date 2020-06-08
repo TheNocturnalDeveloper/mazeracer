@@ -3,7 +3,6 @@ package nl.fontys.se3.presentation;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.javalin.Javalin;
 import io.javalin.core.validation.JavalinValidation;
-import io.javalin.http.staticfiles.Location;
 import io.javalin.plugin.json.JavalinJackson;
 import io.javalin.plugin.openapi.OpenApiOptions;
 import io.javalin.plugin.openapi.OpenApiPlugin;
