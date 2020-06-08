@@ -45,7 +45,6 @@ public class Main {
         JavalinValidation.register(RoomDifficulty.class, input -> wrapException(() -> RoomDifficulty.valueOf(input.toUpperCase())));
 
         return Javalin.create(config -> {
-            config.addStaticFiles("presentation/src/main/resources/web", Location.EXTERNAL);
             config.addStaticFiles("web");
             config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
         }).start(80);
